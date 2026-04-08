@@ -424,7 +424,7 @@ class ContactPositionEstimatorWidget(ScriptedLoadableModuleWidget):
 #        fiducialData = self.fiducialSplitBox.currentNode()
 #
 #        # Get channel names
-#        chLabels = [fiducialData.GetNthFiducialLabel(i) for i in xrange(fiducialData.GetNumberOfFiducials())]
+#        chLabels = [fiducialData.GetNthControlPointLabel(i) for i in xrange(fiducialData.GetNumberOfControlPoints())]
 #
 #        # Extract electrode name from channel names
 #        elLabels = [re.match('[A-Z]*\'?', x).group(0) for x in chLabels]
@@ -446,9 +446,9 @@ class ContactPositionEstimatorWidget(ScriptedLoadableModuleWidget):
 #                # each electrode and populate with corresponding
 #                # channel positions and labels
 #                P = [0.0, 0.0, 0.0]
-#                fiducialData.GetNthFiducialPosition(chIdx + offset, P)
+#                fiducialData.GetNthControlPointPosition(chIdx + offset, P)
 #                newFids.AddFiducial(P[0], P[1], P[2])
-#                newFids.SetNthControlPointLabel(chIdx, fiducialData.GetNthFiducialLabel(chIdx + offset))
+#                newFids.SetNthControlPointLabel(chIdx, fiducialData.GetNthControlPointLabel(chIdx + offset))
 #                newFids.SetNthMarkupDescription(chIdx, fiducialData.GetNthMarkupDescription(chIdx + offset))
 #
 #            slicer.modules.markups.logic().SetAllMarkupsLocked(newFids, True)

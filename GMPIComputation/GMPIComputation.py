@@ -34,6 +34,9 @@ class GMPIComputation(ScriptedLoadableModule):
 ####                                                                                 ####
 #########################################################################################
 class GMPIComputationWidget(ScriptedLoadableModuleWidget):
+    def __init__(self, parent=None):
+        ScriptedLoadableModuleWidget.__init__(self, parent)
+        self.logic = GMPIComputationLogic()
 
     #######################################################################################
     ### setup
@@ -262,19 +265,19 @@ class GMPIComputationLogic(ScriptedLoadableModuleLogic):
             return
 
         # Set the parameters of the progess bar and show it
-        self.pb.setRange(0,fids.GetNumberOfFiducials())
+        self.pb.setRange(0,fids.GetNumberOfControlPoints())
         self.pb.show()
         self.pb.setValue(0)
         slicer.app.processEvents()
 
         # Compute GMPI for each fiducial
-        for i in range(fids.GetNumberOfFiducials()):
+        for i in range(fids.GetNumberOfControlPoints()):
             # update progress bar
             self.pb.setValue(i+1)
             slicer.app.processEvents()
 
             # Only for Active Fiducial points the GMPI is computed
-            if fids.GetNthFiducialSelected(i) == True:
+            if fids.GetNthControlPointSelected(i) == True:
 
                 # Check if it is a left or right channel, by reading the contact
                 # label. If the label contain the '(prime) char then the contact
@@ -285,7 +288,7 @@ class GMPIComputationLogic(ScriptedLoadableModuleLogic):
                 # or negative x respect to the volume centre)
                 # instead of using contact names (which
                 # may significantly vary among centres)
-                chLabel = fids.GetNthFiducialLabel(i)
+                chLabel = fids.GetNthControlPointLabel(i)
                 if re.search('^\w\d+',chLabel) is None:
                     # left channel
                     pial = leftPial.GetPolyData()
@@ -304,7 +307,7 @@ class GMPIComputationLogic(ScriptedLoadableModuleLogic):
                 currContactCentroid = [0,0,0]
 
                 # copy current position from FiducialList
-                fids.GetNthFiducialPosition(i,currContactCentroid)
+                fids.GetNthControlPointPosition(i,currContactCentroid)
 
                 # find nearest vertex coordinates
                 [whiteNearVtx, whiteNearIdx] = self.findNearestVertex(currContactCentroid,whiteVertices)
@@ -312,7 +315,7 @@ class GMPIComputationLogic(ScriptedLoadableModuleLogic):
 
                 # print ",".join([str(pialNearVtx),str(whiteNearVtx),str(currContactCentroid)])
                 gmpi=float("{0:.3f}".format(self.computeGmpi(currContactCentroid,pialNearVtx,whiteNearVtx)))
-                print (fids.GetNthFiducialLabel(i)+" gmpi: "+ str(gmpi))
+                print (fids.GetNthControlPointLabel(i)+" gmpi: "+ str(gmpi))
 
                 self.descr = fids.GetNthControlPointDescription(i)
                 if self.descr[-1:] == ',':
@@ -437,9 +440,9 @@ class GMPIComputationLogic(ScriptedLoadableModuleLogic):
     #     # implantDict = dict()
     #     implant = Implant()
     #
-    #     for elIdx in xrange(0,fids.GetNumberOfFiducials()):
+    #     for elIdx in xrange(0,fids.GetNumberOfControlPoints()):
     #         chpos = [0.0, 0.0, 0.0]
-    #         fids.GetNthFiducialPosition(elIdx,chpos)
+    #         fids.GetNthControlPointPosition(elIdx,chpos)
     #         desc = fids.GetNthMarkupDescription(elIdx)
     #         desc = re.split(',', desc)
     #         descDict = dict()
@@ -459,8 +462,8 @@ class GMPIComputationLogic(ScriptedLoadableModuleLogic):
     #         # and cortical channels.
     #         isSubCtx = any([descDict.has_key(x) for x in ('Hip','Put','Amy','Cau','Tal')])
     #
-    #         # implantDict[fids.GetNthFiducialLabel(elIdx)] = (chpos, gmpi, ptd, isSubCtx)
-    #         implant.append(Electrode(fids.GetNthFiducialLabel(elIdx),chpos,gmpi,ptd,isSubCtx))
+    #         # implantDict[fids.GetNthControlPointLabel(elIdx)] = (chpos, gmpi, ptd, isSubCtx)
+    #         implant.append(Electrode(fids.GetNthControlPointLabel(elIdx),chpos,gmpi,ptd,isSubCtx))
     #
     #     implant.computeDistances()
     #

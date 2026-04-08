@@ -473,9 +473,9 @@ class FinalizerWidget(ScriptedLoadableModuleWidget):
 
         # read get the fiducial file reconstructed
         rawFiducialData = self.fiducialSplitBox.currentNode()
-        for i in range(rawFiducialData.GetNumberOfFiducials()):
+        for i in range(rawFiducialData.GetNumberOfControlPoints()):
             P2 = [0.0, 0.0, 0.0]
-            rawFiducialData.GetNthFiducialPosition(i, P2)
+            rawFiducialData.GetNthControlPointPosition(i, P2)
             P2T = numpy.matrix([[float(P2[0])],[float(P2[1])],[float(P2[2])],['1']], dtype=numpy.float64)
 
             # convert from RAS to MNI and update rawFiducialData
@@ -496,7 +496,7 @@ class FinalizerWidget(ScriptedLoadableModuleWidget):
         fiducialData = rawFiducialData
 
         # Get channel names
-        chLabels = [fiducialData.GetNthFiducialLabel(i) for i in range(fiducialData.GetNumberOfFiducials())]
+        chLabels = [fiducialData.GetNthControlPointLabel(i) for i in range(fiducialData.GetNumberOfControlPoints())]
 
         # Extract electrode name from channel names
         elLabels = [re.match('[A-Z]*\'?', x).group(0) for x in chLabels]
@@ -518,9 +518,9 @@ class FinalizerWidget(ScriptedLoadableModuleWidget):
                 # each electrode and populate with corresponding
                 # channel positions and labels
                 P = [0.0, 0.0, 0.0]
-                fiducialData.GetNthFiducialPosition(chIdx + offset, P)
+                fiducialData.GetNthControlPointPosition(chIdx + offset, P)
                 newFids.AddFiducial(P[0], P[1], P[2])
-                newFids.SetNthFiducialLabel(chIdx, fiducialData.GetNthFiducialLabel(chIdx + offset))
+                newFids.SetNthFiducialLabel(chIdx, fiducialData.GetNthControlPointLabel(chIdx + offset))
                 newFids.SetNthControlPointDescription(chIdx, fiducialData.GetNthControlPointDescription(chIdx + offset))
 
             slicer.modules.markups.logic().SetAllMarkupsLocked(newFids, True)
@@ -713,8 +713,8 @@ class FinalizerLogic(ScriptedLoadableModuleLogic):
         # we should iterate the channel list
         # and find relevant information in the fiducial file
         tmpImplant = []
-        for elIdx in range(0,fids.GetNumberOfFiducials()):
-            tmpImplant.append(fids.GetNthFiducialLabel(elIdx))
+        for elIdx in range(0,fids.GetNumberOfControlPoints()):
+            tmpImplant.append(fids.GetNthControlPointLabel(elIdx))
 
         for channel in channelList:
             try:
@@ -722,9 +722,9 @@ class FinalizerLogic(ScriptedLoadableModuleLogic):
             except ValueError:
                 continue
 
-            if elIdx and fids.GetNthFiducialSelected(elIdx):
+            if elIdx and fids.GetNthControlPointSelected(elIdx):
                 chpos = [0.0, 0.0, 0.0]
-                fids.GetNthFiducialPosition(elIdx,chpos)
+                fids.GetNthControlPointPosition(elIdx,chpos)
                 desc = fids.GetNthControlPointDescription(elIdx)
                 desc = re.split(',', desc)
                 descDict = dict()
@@ -744,8 +744,8 @@ class FinalizerLogic(ScriptedLoadableModuleLogic):
                 # and cortical channels.
                 isSubCtx = any([x in descDict for x in ('Hip','Put','Amy','Cau','Tal')])
 
-                # implantDict[fids.GetNthFiducialLabel(elIdx)] = (chpos, gmpi, ptd, isSubCtx)
-                implant.append(Electrode(fids.GetNthFiducialLabel(elIdx),chpos,gmpi,ptd,isSubCtx))
+                # implantDict[fids.GetNthControlPointLabel(elIdx)] = (chpos, gmpi, ptd, isSubCtx)
+                implant.append(Electrode(fids.GetNthControlPointLabel(elIdx),chpos,gmpi,ptd,isSubCtx))
         implant.computeDistances()
 
         # Create bipolar first
